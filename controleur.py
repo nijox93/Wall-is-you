@@ -6,4 +6,3 @@ f = "game_files/maps/map_test.txt"
 donjon, position, dragons = charge_fichier(f)
 pos_dragons = position_dragons(dragons)
 aventurier = Aventurier(position, 1)
-print(intention(donjon, aventurier.position, position_dragons(dragons)))

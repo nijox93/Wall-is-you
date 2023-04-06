@@ -112,6 +112,9 @@ def charge_dragons(fichier):
 
 def charge_fichier(fichier):
     ''' Charge les données d'une map '''
+    #                                                 #
+    ## AMELIORATION DE LA GESTION D'ERREURS POSSIBLE ##
+    #                                                 #
     fichier = open(fichier, "r", encoding="utf-8")
     fichier = fichier.read().splitlines()
     donjon = charge_grille(fichier)
