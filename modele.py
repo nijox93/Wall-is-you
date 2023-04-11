@@ -50,17 +50,17 @@ def Voisines(donjon, position):
     return voisines
 
 
-def intention(donjon, position, dragons, visite=[]):
+def intention(donjon, position, pos_dragons, visite=[]):
     ''' Renvoie une chemin possible de l'aventurier jusqu'au dragon '''
     visite.append(position)
     chemin = []
-    if position in dragons:
+    if position in pos_dragons:
         return [position]
     voisines = Voisines(donjon, position)
     for voisine in voisines:
         if voisine not in visite:
             if connecte(donjon, position, voisine):
-                chemin = intention(donjon, voisine, dragons, visite)
+                chemin = intention(donjon, voisine, pos_dragons, visite)
                 if chemin != []:
                     return [position] + chemin
     return chemin
@@ -79,7 +79,7 @@ def charge_grille(fichier):
               '╬': [True, True, True, True]}
     i = 0
     for ligne in fichier:
-        ligne = fichier[i]
+        print("ligne: ", ligne)
         if ligne[0] == 'A':
             break
         grille.append([])
