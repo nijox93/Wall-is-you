@@ -26,12 +26,9 @@ def connecte(donjon, p1, p2):
 
 def pivoter(donjon, position):
     ''' Pivote une case '''
-    if position == (2,1):
-        print("c bon")
-    t = donjon[position[0]][position[1]]
+    t = donjon[position[0]][position[1]].copy()
     t[0], t[1], t[2], t[3] = t[3], t[0], t[1], t[2]
-    donjon[position[0]][position[1]] = t
-#     return donjon
+    donjon[position[0]][position[1]] = t.copy()
 
 
 def Voisines(donjon, position):
