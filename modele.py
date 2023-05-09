@@ -16,11 +16,15 @@ def connecte(donjon, p1, p2):
     ''' Vérifie si deux salles sont connectées ou pas '''
     portes1, portes2 = donjon[p1[0]][p1[1]], donjon[p2[0]][p2[1]]
     if p1[0] == p2[0]:
-        return ((portes1[1] and portes2[3])
-                or (portes1[3] and portes2[1]))
+        if p1[1] < p2[1]:
+            return portes1[1] and portes2[3]
+        else:
+            return portes1[3] and portes2[1]
     elif p1[1] == p2[1]:
-        return ((portes1[0] and portes2[2])
-                or (portes1[2] and portes2[0]))
+        if p1[0] < p2[0]:
+            return portes1[2] and portes2[0]
+        else:
+            return portes1[0] and portes2[2]
     return False
 
 
@@ -48,21 +52,38 @@ def Voisines(donjon, position):
         voisines.append(p2)
     return voisines
 
+def donne_dragon(dragons, position):
+    for dragon in dragons:
+        if dragon.position == position:
+            return dragon
 
-def intention(donjon, position, pos_dragons, visite=[]):
+def intention(donjon, position, dragons, visite=[]):
     ''' Renvoie une chemin possible de l'aventurier jusqu'au dragon '''
     visite.append(position)
     chemin = []
-    if position in pos_dragons:
+    if position in position_dragons(dragons):
+        print(position)
         return [position]
     voisines = Voisines(donjon, position)
     for voisine in voisines:
         if voisine not in visite:
             if connecte(donjon, position, voisine):
-                chemin = intention(donjon, voisine, pos_dragons, visite)
+                chemin = intention(donjon, voisine, dragons, visite)
                 if chemin != []:
                     return [position] + chemin
     return chemin
+
+
+def deplace_aventurier(aventurier, dragons, position):
+    ''' Déplace l'aventurier et met à jour le donjon '''
+    aventurier.position = position
+    aventurier.niveau += 1
+    t = []
+    for dragon in dragons:
+        if dragon.position != position:
+            t.append(dragon)
+    dragons = t.copy()
+    return dragons
 
 
 def charge_grille(fichier):
@@ -104,7 +125,7 @@ def charge_dragons(fichier):
     for ligne in fichier:
         if ligne[0] == 'D':
             ligne = ligne.split(" ")
-            x, y, niv = int(ligne[1]), int(ligne[2]), ligne[3]
+            x, y, niv = int(ligne[1]), int(ligne[2]), int(ligne[3])
             dragons.append(Dragon((x, y), niv))
     return dragons
 
