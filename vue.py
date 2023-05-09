@@ -64,27 +64,33 @@ def dessine_image(donjon, position, path, tag):
     image(x0 + (x1 - x0)//2, y0 + (y1 - y0)//2, path, hauteur=int(k*2), largeur=int(k*2), tag=tag)
 
 def dessine_aventurier(donjon, position):
+    efface("aventurier")
     dessine_image(donjon, position, "game_files/media/pikachu.png", "aventurier")
 
-def dessine_dragon(donjon, position):
-    dessine_image(donjon, position, "game_files/media/gengar2.png", "dragon")
+def dessine_dragons(donjon, pos_dragons):
+    ''' Dessine des dragons '''
+    efface("dragon")
+    for position in pos_dragons:
+        dessine_image(donjon, position, "game_files/media/gengar2.png", "dragon")
 
 def dessine_chemin(donjon, chemin):
     efface("chemin")
-    n = 0
-    while n != len(chemin)-1:
-        (i,j) = chemin[n]
-        x0, y0 = j * (largeur/len(donjon)), i * (hauteur/len(donjon[0]))
-        x1, y1 = (j+1) * (largeur/len(donjon)), (i+1) * (hauteur/len(donjon[0]))
-        xf_1, yf_1 = x0 + (x1 - x0)//2, y0 + (y1 - y0)//2
-        
-        (i,j) = chemin[n+1]
-        x0, y0 = j * (largeur/len(donjon)), i * (hauteur/len(donjon[0]))
-        x1, y1 = (j+1) * (largeur/len(donjon)), (i+1) * (hauteur/len(donjon[0]))
-        xf_2, yf_2 = x0 + (x1 - x0)//2, y0 + (y1 - y0)//2
-        
-        ligne(xf_1, yf_1, xf_2, yf_2, 'red', k/3, tag="chemin")
-        n += 1
+    if chemin != []:
+        n = 0
+        while n != len(chemin)-1:
+            (i,j) = chemin[n]
+            x0, y0 = j * (largeur/len(donjon)), i * (hauteur/len(donjon[0]))
+            x1, y1 = (j+1) * (largeur/len(donjon)), (i+1) * (hauteur/len(donjon[0]))
+            xf_1, yf_1 = x0 + (x1 - x0)//2, y0 + (y1 - y0)//2
+                
+            (i,j) = chemin[n+1]
+            x0, y0 = j * (largeur/len(donjon)), i * (hauteur/len(donjon[0]))
+            x1, y1 = (j+1) * (largeur/len(donjon)), (i+1) * (hauteur/len(donjon[0]))
+            xf_2, yf_2 = x0 + (x1 - x0)//2, y0 + (y1 - y0)//2
+            
+            ligne(xf_1, yf_1, xf_2, yf_2, 'red', k/3, tag="chemin")
+            n += 1
 
-# def donne_position(x, y):
-#     
+def donne_position(donjon, abscisse, ordonnee):
+    ''' Renvoie la case correspondant au couple de coordonnées abscisse/ordonnée '''
+    return int(abscisse // (largeur/len(donjon[0]))), int(ordonnee // (hauteur/len(donjon)))
