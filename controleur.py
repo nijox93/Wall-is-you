@@ -7,11 +7,17 @@ f = "game_files/maps/map_test.txt"
 donjon, position, dragons = charge_fichier(f)
 aventurier = Aventurier(position, 1)
 chemin = []
-# pos_dragons = position_dragons(dragons)
-print(position_dragons(dragons))
-dessine_donjon(donjon, dragons, aventurier)
-dessine_aventurier(donjon, aventurier.position)
-dessine_dragons(donjon, position_dragons(dragons))
+
+elements = []
+for i in range(len(donjon)):
+    elements.append([])
+    for j in range(len(donjon[i])):
+        elements[i].append([])
+for dragon in dragons:
+    (x,y) = dragon.position
+    elements[x][y] = dragon
+
+dessine_niveau(donjon, dragons, aventurier)
 
 while dragons != []:
     ev = donne_ev()
@@ -29,34 +35,20 @@ while dragons != []:
 
     elif tev == "ClicDroit":
         # Cherche le chemin vers le dragon le plus haut niveau
-        chemin = intention(donjon, position, dragons, [])
-        for i in range(1, len(dragons)-1):
-            dragon = dragons[i]
-            new_chemin = intention(donjon, position, dragons)
-            if dragon.niveau > donne_dragon(dragons, new_chemin[len(new_chemin)-1]).niveau:
-                chemin = new_chemin
+        chemin = intention(donjon, aventurier.position, dragons, elements)
         dessine_chemin(donjon, chemin)
-        print(donjon[0][4])
 
     elif tev == "Touche":
         nom_touche = touche(ev)
-
+        
         if nom_touche == "space":
             # L'aventurier affronte le dragon
             if chemin != []:
-                position = chemin[len(chemin)-1]
-                for dragon in dragons:
-                    if dragon.position == position:
-                        dragon_affronte = dragon
-                        break
-                print("niveau dragon: ", dragon.niveau)
-                if aventurier.niveau < dragon.niveau:
-                    
+                if not combat(dragons, elements, aventurier, chemin):
                     print("PERDU")
                     break
-                dragons = deplace_aventurier(aventurier, dragons, position)
-                dessine_chemin(donjon, [])
-                dessine_aventurier(donjon, position)
-                dessine_dragons(donjon, position_dragons(dragons))
+                dessine_niveau(donjon, dragons, aventurier)
+                chemin = []
+                efface("chemin")
     mise_a_jour()
 ferme_fenetre()
