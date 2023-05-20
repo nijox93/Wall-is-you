@@ -4,7 +4,6 @@ class Aventurier():
         self.position = position
         self.niveau = niveau
 
-
 class Dragon():
     def __init__(self, position, niveau):
         self.position = position
@@ -52,26 +51,52 @@ def Voisines(donjon, position):
         voisines.append(p2)
     return voisines
 
+
 def donne_dragon(dragons, position):
+    ''' Renvoie l'objet dragon correspondant à la position '''
     for dragon in dragons:
         if dragon.position == position:
             return dragon
 
-def intention(donjon, position, dragons, visite=[]):
-    ''' Renvoie une chemin possible de l'aventurier jusqu'au dragon '''
+
+def position_dragons(dragons):
+    ''' Renvoie la position de tous les dragons '''
+    positions = []
+    for dragon in dragons:
+        positions.append(dragon.position)
+    return positions
+
+
+def trouve_dragon(donjon, position, dragons, visite=[]):
+    ''' Renvoie un chemin possible de l'aventurier jusqu'au dragon '''
     visite.append(position)
     chemin = []
     if position in position_dragons(dragons):
-        print(position)
         return [position]
     voisines = Voisines(donjon, position)
     for voisine in voisines:
         if voisine not in visite:
             if connecte(donjon, position, voisine):
-                chemin = intention(donjon, voisine, dragons, visite)
+                chemin = trouve_dragon(donjon, voisine, dragons, visite)
                 if chemin != []:
                     return [position] + chemin
     return chemin
+
+
+def intention(donjon, position, dragons, elements):
+    ''' Renvoie le chemin que l'aventurier veut faire '''
+    visite, chemin, chemin_f = [], [], []
+    nMax = 0
+    for i in range(len(dragons)):
+        chemin = trouve_dragon(donjon, position, dragons, visite.copy())
+        if chemin != []:
+            (x,y) = chemin[len(chemin)-1]
+            dragon = elements[x][y]
+            visite.append(dragon.position)
+            if dragon.niveau > nMax:
+                nMax = dragon.niveau
+                chemin_f = chemin.copy()
+    return chemin_f
 
 
 def deplace_aventurier(aventurier, dragons, position):
@@ -79,11 +104,22 @@ def deplace_aventurier(aventurier, dragons, position):
     aventurier.position = position
     aventurier.niveau += 1
     t = []
-    for dragon in dragons:
+    for i in range(len(dragons)):
+        t.append(dragons.pop())
+    for dragon in t:
         if dragon.position != position:
-            t.append(dragon)
-    dragons = t.copy()
-    return dragons
+            dragons.append(dragon)
+
+
+def combat(dragons, elements, aventurier, chemin):
+    ''' Renvoie True si l'aventurier gagne, false sinon '''
+    (x,y) = chemin[len(chemin)-1]
+    dragon = elements[x][y]
+    if aventurier.niveau < dragon.niveau:
+        return False
+    deplace_aventurier(aventurier, dragons, dragon.position)
+    elements[x][y] = ""
+    return True
 
 
 def charge_grille(fichier):
@@ -141,11 +177,3 @@ def charge_fichier(fichier):
     position = charge_aventurier(fichier)
     dragons = charge_dragons(fichier)
     return donjon, position, dragons
-
-
-def position_dragons(dragons):
-    ''' Renvoie la liste des positions d'une liste de dragons '''
-    positions = []
-    for dragon in dragons:
-        positions.append(dragon.position)
-    return positions
