@@ -38,52 +38,77 @@ def Voisines(donjon, position):
     ''' Renvoie les voisines disponibles '''
     voisines = []
     if position[0] > 0:
-        p2 = (position[0] - 1, position[1])
-        voisines.append(p2)
-    if position[1] < len(donjon[0]) - 1:
-        p2 = (position[0], position[1] + 1)
-        voisines.append(p2)
+        voisine = (position[0] - 1, position[1])
+        if connecte(donjon, position, voisine):
+            voisines.append(voisine)
+    if position[1] < len(donjon[position[0]]) - 1:
+        voisine = (position[0], position[1] + 1)
+        if connecte(donjon, position, voisine):
+            voisines.append(voisine)
     if position[0] < len(donjon) - 1:
-        p2 = (position[0] + 1, position[1])
-        voisines.append(p2)
+        voisine = (position[0] + 1, position[1])
+        if connecte(donjon, position, voisine):
+            voisines.append(voisine)
     if position[1] > 0:
-        p2 = (position[0], position[1] - 1)
-        voisines.append(p2)
+        voisine = (position[0], position[1] - 1)
+        if connecte(donjon, position, voisine):
+            voisines.append(voisine)
     return voisines
 
 
 def donne_dragon(dragons, position):
     ''' Renvoie l'objet dragon correspondant à la position '''
-    for dragon in dragons:
-        if dragon.position == position:
-            return dragon
+    (xy) = position
+    return dragons[x][y]
 
 
 def position_dragons(dragons):
     ''' Renvoie la position de tous les dragons '''
     positions = []
-    for dragon in dragons:
-        positions.append(dragon.position)
+    for i in range(len(dragons)):
+        for j in range(len(dragons[i])):
+            dragon = dragons[i][j]
+            if dragon != "":
+                positions.append(dragon.position)
     return positions
 
 
+# def trouve_dragon(donjon, position, dragons, visite=[]):
+#     ''' Renvoie un chemin possible de l'aventurier jusqu'au dragon '''
+#     visite.append(position)
+#     chemin = []
+#     if position in position_dragons(dragons):
+#         return [position]
+#     voisines = Voisines(donjon, position)
+#     for voisine in voisines:
+#         if voisine not in visite:
+#             if connecte(donjon, position, voisine):
+#                 chemin = trouve_dragon(donjon, voisine, dragons, visite)
+#                 if chemin != []:
+#                     return [position] + chemin
+#     return chemin
+
+
 def trouve_dragon(donjon, position, dragons, visite=[]):
-    ''' Renvoie un chemin possible de l'aventurier jusqu'au dragon '''
-    visite.append(position)
-    chemin = []
-    if position in position_dragons(dragons):
-        return [position]
-    voisines = Voisines(donjon, position)
-    for voisine in voisines:
-        if voisine not in visite:
-            if connecte(donjon, position, voisine):
-                chemin = trouve_dragon(donjon, voisine, dragons, visite)
-                if chemin != []:
-                    return [position] + chemin
-    return chemin
+    ''' Renvoie le plus court chemin pour affronter un dragon '''
+    voisines = []
+    file = []
+    file.append([position])
+    while file != []:
+        lenF = len(file)
+        for i in range(lenF):
+            voisines = Voisines(donjon, file[0][len(file[0])-1])
+            for voisine in voisines:
+                if voisine not in visite:
+                    file.append(file[0] + [voisine])
+            visite += file.pop(0)
+        for chemin in file:
+            (x,y) = chemin[len(chemin)-1]
+            if dragons[x][y] != "":
+                return chemin
+    return []
 
-
-def intention(donjon, position, dragons, elements):
+def intention(donjon, position, dragons):
     ''' Renvoie le chemin que l'aventurier veut faire '''
     visite, chemin, chemin_f = [], [], []
     nMax = 0
@@ -91,7 +116,7 @@ def intention(donjon, position, dragons, elements):
         chemin = trouve_dragon(donjon, position, dragons, visite.copy())
         if chemin != []:
             (x,y) = chemin[len(chemin)-1]
-            dragon = elements[x][y]
+            dragon = dragons[x][y]
             visite.append(dragon.position)
             if dragon.niveau > nMax:
                 nMax = dragon.niveau
@@ -103,22 +128,17 @@ def deplace_aventurier(aventurier, dragons, position):
     ''' Déplace l'aventurier et met à jour le donjon '''
     aventurier.position = position
     aventurier.niveau += 1
-    t = []
-    for i in range(len(dragons)):
-        t.append(dragons.pop())
-    for dragon in t:
-        if dragon.position != position:
-            dragons.append(dragon)
+    (x,y) = position
 
 
-def combat(dragons, elements, aventurier, chemin):
+def combat(dragons, aventurier, chemin):
     ''' Renvoie True si l'aventurier gagne, false sinon '''
     (x,y) = chemin[len(chemin)-1]
-    dragon = elements[x][y]
+    dragon = dragons[x][y]
     if aventurier.niveau < dragon.niveau:
         return False
+    dragons[x][y] = ""
     deplace_aventurier(aventurier, dragons, dragon.position)
-    elements[x][y] = ""
     return True
 
 
@@ -135,13 +155,13 @@ def charge_grille(fichier):
               '╬': [True, True, True, True]}
     i = 0
     for ligne in fichier:
-        print("ligne: ", ligne)
         if ligne[0] == 'A':
             break
         grille.append([])
         for elem in ligne:
-            grille[i].append(salles[elem])
-        i += 1
+            if elem in salles:
+                grille[i].append(salles[elem])
+        i += 1 #numéro de ligne augmente
     return grille
 
 
@@ -155,14 +175,14 @@ def charge_aventurier(fichier):
     return (x, y)
 
 
-def charge_dragons(fichier):
+def charge_dragons(fichier, donjon):
     ''' Charge la liste des dragons '''
-    dragons = []
+    dragons = [["" for _ in range(len(donjon[i]))] for i in range(len(donjon))]
     for ligne in fichier:
         if ligne[0] == 'D':
             ligne = ligne.split(" ")
             x, y, niv = int(ligne[1]), int(ligne[2]), int(ligne[3])
-            dragons.append(Dragon((x, y), niv))
+            dragons[x][y] = Dragon((x, y), niv)
     return dragons
 
 
@@ -175,5 +195,14 @@ def charge_fichier(fichier):
     fichier = fichier.read().splitlines()
     donjon = charge_grille(fichier)
     position = charge_aventurier(fichier)
-    dragons = charge_dragons(fichier)
+    dragons = charge_dragons(fichier, donjon)
     return donjon, position, dragons
+
+
+def gagne(dragons):
+    ''' Vérifie si l'aventurier a gagné en tuant tous les dragons '''
+    for ligne in dragons:
+        for dragon in ligne:
+            if dragon != "":
+                return False
+    return True
