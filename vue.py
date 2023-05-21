@@ -1,7 +1,7 @@
 from fltk import*
 img_dragon = "game_files/media/gengar2.png"
 img_knight = "game_files/media/pikachu.png"
-fichier = open("parametres.txt", "r", encoding="utf-8")
+fichier = open("game_files/parametres.txt", "r", encoding="utf-8")
 parametres = fichier.read().splitlines()
 largeur, hauteur = int(parametres[0]), int(parametres[1])
 moyenne = (largeur + hauteur) // 2
