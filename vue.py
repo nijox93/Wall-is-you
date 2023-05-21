@@ -135,10 +135,8 @@ def dessine_dragons(donjon, dragons):
             dragon = dragons[i][j]
             if dragon != "":
                 position = dragon.position
-#                 dessine_image(donjon, position,
-#                               "game_files/media/gengar" + str(dragon.niveau) + ".png", "dragon")
                 dessine_image(donjon, position,
-                              "game_files/media/gengar.png", "dragon")
+                              "game_files/media/gengar" + str(dragon.niveau) + ".png", "dragon")
 
 
 def dessine_chemin(donjon, chemin):
