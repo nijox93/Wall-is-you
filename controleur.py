@@ -3,30 +3,22 @@ from vue import*
 
 #INITIALISATION
 f = "game_files/maps/map_test.txt"
-# f = open("game_files/maps/map_test.txt", "r", encoding="utf-8")
-donjon, position, dragons = charge_fichier(f)
-aventurier = Aventurier(position, 1)
-chemin = []
+f = menu() #Ouvre le menu du choix de niveaux
+if f != "":
+    donjon, position, dragons = charge_fichier(f)
+    aventurier = Aventurier(position, 1)
+    chemin = []
+    dessine_niveau(donjon, dragons, aventurier)
 
-elements = []
-for i in range(len(donjon)):
-    elements.append([])
-    for j in range(len(donjon[i])):
-        elements[i].append([])
-for dragon in dragons:
-    (x,y) = dragon.position
-    elements[x][y] = dragon
 
-dessine_niveau(donjon, dragons, aventurier)
-
-while dragons != []:
+while f!= "" and not gagne(dragons):
     ev = donne_ev()
     tev = type_ev(ev)
 
     if tev == "Quitte":
         break
 
-    elif tev == "ClicGauche":
+    elif tev == "ClicGauche": 
         # Pivote la case sur laquelle on clique
         j, i = donne_position(donjon, abscisse(ev), ordonnee(ev))
         pivoter(donjon, (i, j))
@@ -35,7 +27,7 @@ while dragons != []:
 
     elif tev == "ClicDroit":
         # Cherche le chemin vers le dragon le plus haut niveau
-        chemin = intention(donjon, aventurier.position, dragons, elements)
+        chemin = intention(donjon, aventurier.position, dragons)
         dessine_chemin(donjon, chemin)
 
     elif tev == "Touche":
@@ -44,11 +36,30 @@ while dragons != []:
         if nom_touche == "space":
             # L'aventurier affronte le dragon
             if chemin != []:
-                if not combat(dragons, elements, aventurier, chemin):
+                if not combat(dragons, aventurier, chemin):
                     print("PERDU")
                     break
                 dessine_niveau(donjon, dragons, aventurier)
                 chemin = []
                 efface("chemin")
+
+        elif nom_touche == "Escape":
+            # REVIENS AU MENU
+            f = menu()
+            if f == "":
+                break
+            donjon, position, dragons = charge_fichier(f)
+            aventurier = Aventurier(position, 1)
+            dessine_niveau(donjon, dragons, aventurier)
+            chemin = []
+
+        elif nom_touche == "r":
+            # REINITIALISE LA SALLE
+            donjon, position, dragons = charge_fichier(f)
+            aventurier = Aventurier(position, 1)
+            chemin = []
+            dessine_niveau(donjon, dragons, aventurier)
+
     mise_a_jour()
+
 ferme_fenetre()
